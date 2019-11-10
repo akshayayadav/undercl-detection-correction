@@ -377,7 +377,7 @@ def get_score_cutoffs_for_pr_curve(pos_prediction_dataframe, famid_name):
 	score_list = np.unique(score_list)
 	score_list = np.sort(score_list)
 
-	score_cutoff_outfile = open(outPath+"/"+famid_name+"/"+famid_name+".score_cutoffs","w")
+	score_cutoff_outfile = open(outPath+"/"+famid_name+".score_cutoffs","w")
 	score_cutoff_outfile.write(np.array_str(score_list))
 	score_cutoff_outfile.close()
 
@@ -450,7 +450,7 @@ def plot_pr_curve(precision_vals, recall_vals, famid_name):
 	plt.ylabel('Precision')
 	plt.ylim([0.0, 1.05])
 	plt.xlim([0.0, 1.05])
-	plt.savefig(outPath+"/"+famid_name+"/"+famid_name+"pr_curve",format='png')
+	plt.savefig(outPath+"/"+famid_name+"pr_curve.png",format='png')
 
 
 def get_predicition_stats_for_specified_cutoff_for_scores(prediction_dataframe, best_cutoff):
@@ -470,7 +470,7 @@ def get_predicition_stats_for_specified_cutoff_for_scores(prediction_dataframe, 
 
 
 def print_performance_stat_dataframe_to_file(prediction_performance_stats, famid_name):
-	prediction_performance_stats.to_csv(outPath+"/"+famid_name+"/"+famid_name+".performance_stats",index=None,sep=' ',mode='w')
+	prediction_performance_stats.to_csv(outPath+"/"+famid_name+".performance_stats",index=None,sep=' ',mode='w')
 
 
 def emit_consensus_sequence(hmm_model_file, seq1, seq2):
@@ -534,7 +534,7 @@ def predict_missing_sequences(trainingpairs_dataframe, famid_name, prediction_pe
 
 	neg_prediction_table = get_test_pair_prediction_dataframe(neg_pairs_table)
 		
-	score_cutoff = read_score_cutoff_from_family_model_stats_file(outPath+"/"+famid_name+"/"+famid_name+".performance_stats", cutoff_type)	
+	score_cutoff = read_score_cutoff_from_family_model_stats_file(outPath+"/"+famid_name+".performance_stats", cutoff_type)	
 	print ("score_cutoff: {0}".format(score_cutoff))
 	get_missing_sequences(neg_prediction_table, score_cutoff, famid_name)
 
@@ -568,7 +568,7 @@ def get_missing_sequences(neg_prediction_table, score_cutoff, famid_name):
 def print_missing_sequences(accepted_sequences_arr, famid_name):
 	accepted_sequences_arr=list(set(accepted_sequences_arr))
 	
-	missing_sequences_outfile=open(outPath+"/"+famid_name+"/"+famid_name+".missing_sequences","w")
+	missing_sequences_outfile=open(outPath+"/"+famid_name+".missing_sequences","w")
 
 	for accepted_seq in accepted_sequences_arr:
 		if not (accepted_seq in seq_dict_from_fam_fasta):
@@ -582,11 +582,11 @@ def family_model_training_and_evaluation(famid_name, cutoff_type):
 	global seqid_sequence_dict
 	global seqpair_consensus_dict
 
-	trainingpairs_dataframe = get_training_pairs_dataframe(outPath+"/"+famid_name+"/"+famid_name+".pairs")
-	seqid_sequence_dict = get_seqid_sequence_dict_from_fasta(outPath+"/"+famid_name+"/"+famid_name+"_closest_sequences.fa")
+	trainingpairs_dataframe = get_training_pairs_dataframe(outPath+"/"+famid_name+".pairs")
+	seqid_sequence_dict = get_seqid_sequence_dict_from_fasta(outPath+"/"+famid_name+"_closest_sequences.fa")
 	
-	write_pair_consensus_fasta(outPath+"/"+famid_name+"/"+famid_name+".pairs", outPath+"/"+famid_name+"/"+famid_name+".pospairs-consensus.fasta")
-	seqpair_consensus_dict = get_sequence_pair_consensus_dict(outPath+"/"+famid_name+"/"+famid_name+".pospairs-consensus.fasta")
+	write_pair_consensus_fasta(outPath+"/"+famid_name+".pairs", outPath+"/"+famid_name+".pospairs-consensus.fasta")
+	seqpair_consensus_dict = get_sequence_pair_consensus_dict(outPath+"/"+famid_name+".pospairs-consensus.fasta")
 	
 	
 	
@@ -608,27 +608,28 @@ def create_directory(dir_Name):
 global outPath
 global seq_dict_from_fam_fasta
 
-famid_name = sys.argv[1]
+famid_name = os.path.basename(sys.argv[1])
 cutoff_type = sys.argv[2]
-outPath = "/data/"+sys.argv[3]+"/"
+results_dir = "/data/"+sys.argv[3]
+outPath = results_dir+"/"+famid_name+"/"
 fasta_dir = "/data/family_fasta/"
 master_fasta = "/data/proteomes.fa"
 ##################################################################################################################################################################
+create_directory(results_dir)
 create_directory(outPath)
 create_directory(outPath+"temp")
-create_directory(outPath+famid_name)
 ###################################################################################################################################################################
 
-execute_phmmer_familyfasta_vs_masterfasta(outPath+famid_name+"/"+famid_name+".phmmertlbout", fasta_dir+famid_name, master_fasta)
+execute_phmmer_familyfasta_vs_masterfasta(outPath+"/"+famid_name+".phmmertlbout", fasta_dir+famid_name, master_fasta)
 ###################################################################################################################################################################
 
-get_sequences_from_phmmer_search(outPath+famid_name+"/"+famid_name+".phmmertlbout",fasta_dir+famid_name, outPath+famid_name+"/"+famid_name+".seqlist")
+get_sequences_from_phmmer_search(outPath+"/"+famid_name+".phmmertlbout",fasta_dir+famid_name, outPath+"/"+famid_name+".seqlist")
 ###################################################################################################################################################################
 
-get_fasta_from_sequence_list(outPath+famid_name+"/"+famid_name+".seqlist", master_fasta, outPath+famid_name+"/"+famid_name+"_closest_sequences.fa")
+get_fasta_from_sequence_list(outPath+"/"+famid_name+".seqlist", master_fasta, outPath+"/"+famid_name+"_closest_sequences.fa")
 ###################################################################################################################################################################
 
-seq_dict_from_fam_fasta = get_pairs_file_from_seqlist(outPath+famid_name+"/"+famid_name+".seqlist", fasta_dir+famid_name, outPath+famid_name+"/"+famid_name+".pairs")
+seq_dict_from_fam_fasta = get_pairs_file_from_seqlist(outPath+"/"+famid_name+".seqlist", fasta_dir+famid_name, outPath+"/"+famid_name+".pairs")
 ###################################################################################################################################################################
 
 family_model_training_and_evaluation(famid_name, cutoff_type)
