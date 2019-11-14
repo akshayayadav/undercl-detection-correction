@@ -40,7 +40,7 @@ def get_sequences_from_phmmer_search(family_phmmertblout_fileName, family_fasta_
 		if(re.match(r'^\#',line)):
 			continue
 		linearr = re.split(r'\s+',line)
-		if(query_subject_dict.has_key(linearr[2])):
+		if(linearr[2] in query_subject_dict):
 			query_subject_dict[linearr[2]].append(linearr[0])
 		else:
 			query_subject_dict[linearr[2]]=list()
@@ -66,7 +66,7 @@ def remove_worst_nonfamily_sequences(query_subject_dict, family_seqid_dict):
 		seqlist = query_subject_dict[query]
 		self_match_flag=0
 		for seq in list(reversed(query_subject_dict[query])):
-			if not (family_seqid_dict.has_key(seq)):
+			if not (seq in family_seqid_dict):
 					seqlist.remove(seq)
 			else:
 				break
@@ -88,9 +88,9 @@ def get_non_family_seq_counts(query_subject_dict):
 	non_family_seq_count_dict={}
 	for query in query_subject_dict:
 		for seq in query_subject_dict[query]:
-			if(query_subject_dict.has_key(seq)):
+			if(seq in query_subject_dict):
 				continue
-			if(non_family_seq_count_dict.has_key(seq)):
+			if(seq in non_family_seq_count_dict):
 				non_family_seq_count_dict[seq]+=1
 			else:
 				non_family_seq_count_dict[seq]=1
@@ -101,7 +101,7 @@ def remove_non_family_sequences(query_subject_dict, non_family_seq_count_dict, n
 	for query in query_subject_dict:
 		subject_seqlist = query_subject_dict[query]
 		for seq in list(query_subject_dict[query]):
-			if(non_family_seq_count_dict.has_key(seq)):
+			if(seq in non_family_seq_count_dict):
 				if((non_family_seq_count_dict[seq]/len(query_subject_dict))<non_family_seq_representation_cutoff):
 					subject_seqlist.remove(seq)
 		query_subject_dict[query]=subject_seqlist
@@ -173,10 +173,10 @@ def get_pairs_file_from_seqlist(seqlist_fileName, family_fasta_fileName, pairs_o
 
 	for i in range(0, len(seqlist_arr)):
 		for j in range(i+1, len(seqlist_arr)):
-			if(seqid_dict.has_key(seqlist_arr[i]) and seqid_dict.has_key(seqlist_arr[j])):
+			if((seqlist_arr[i] in seqid_dict) and (seqlist_arr[j] in seqid_dict)):
 				pairs_outfile.write(str(10000)+"\t"+seqlist_arr[i]+"\t"+seqlist_arr[j]+"\n")
 
-			elif (seqid_dict.has_key(seqlist_arr[i]) or seqid_dict.has_key(seqlist_arr[j])):
+			elif ((seqlist_arr[i] in seqid_dict) or (seqlist_arr[j] in seqid_dict)):
 				pairs_outfile.write(str(99999)+"\t"+seqlist_arr[i]+"\t"+seqlist_arr[j]+"\n")
 	
 	pairs_outfile.close()
@@ -199,7 +199,7 @@ def get_seqid_sequence_dict_from_fasta(trainingfasta_fileName):
 
 def get_training_pairs_dataframe(trainingpairs_fileName):
 	trainingpairs_dataframe=pd.DataFrame()
-	trainingpairs_dataframe=pd.read_table(trainingpairs_fileName, sep="\s+", header=None)
+	trainingpairs_dataframe=pd.read_csv(trainingpairs_fileName, sep="\s+", header=None)
 
 	return(trainingpairs_dataframe)
 
@@ -293,7 +293,7 @@ def get_test_pair_prediction_dataframe(test_split):
 	seqid_evalue_domcount_dict = get_seqid_evalue_domcount_dict("testing.fasta.hmmsearch")
 	
 	for index, testrow in test_split.iterrows():
-		if(seqid_evalue_domcount_dict.has_key(testrow['seq1'])):
+		if(testrow['seq1'] in seqid_evalue_domcount_dict):
 			seq1_values.append(seqid_evalue_domcount_dict[testrow['seq1']]['evalue'])
 			seq1_domcount.append(seqid_evalue_domcount_dict[testrow['seq1']]['domcount'])
 			seq1_score.append(seqid_evalue_domcount_dict[testrow['seq1']]['score'])
@@ -302,7 +302,7 @@ def get_test_pair_prediction_dataframe(test_split):
 			seq1_domcount.append(0)
 			seq1_score.append(0)
 
-		if(seqid_evalue_domcount_dict.has_key(testrow['seq2'])):
+		if(testrow['seq2'] in seqid_evalue_domcount_dict):
 			seq2_values.append(seqid_evalue_domcount_dict[testrow['seq2']]['evalue'])
 			seq2_domcount.append(seqid_evalue_domcount_dict[testrow['seq2']]['domcount'])
 			seq2_score.append(seqid_evalue_domcount_dict[testrow['seq2']]['score'])
@@ -500,7 +500,7 @@ def emit_consensus_sequence(hmm_model_file, seq1, seq2):
 
 def write_pair_consensus_fasta(trainingpairs_fileName, pospair_outfasta_fileName):
 	trainingpairs_dataframe=pd.DataFrame()
-	trainingpairs_dataframe=pd.read_table(trainingpairs_fileName, sep="\s+", header=None)
+	trainingpairs_dataframe=pd.read_csv(trainingpairs_fileName, sep="\s+", header=None)
 	pospair_outfasta_file=open(pospair_outfasta_fileName,"w")
 	for index, testrow in trainingpairs_dataframe.iterrows():
 		if(testrow.ix[0]!=99999):
@@ -522,13 +522,13 @@ def get_sequence_pair_consensus_dict(pospair_fasta_fileName):
 			seqheader = line[1:]
 			seq1, seq2 = re.split(r'\#',seqheader)
 		else:
-			if(seqpair_consensus_dict.has_key(seq1)):
+			if(seq1 in seqpair_consensus_dict):
 				seqpair_consensus_dict[seq1][seq2]=line
 			else:
 				seqpair_consensus_dict[seq1]={}
 				seqpair_consensus_dict[seq1][seq2]=line
 	
-			if(seqpair_consensus_dict.has_key(seq2)):
+			if(seq2 in seqpair_consensus_dict):
 				seqpair_consensus_dict[seq2][seq1]=line
 			else:
 				seqpair_consensus_dict[seq2]={}
@@ -588,7 +588,7 @@ def print_missing_sequences(accepted_sequences_arr, famid_name):
 	missing_sequences_outfile=open(outPath+"/"+famid_name+".missing_sequences","w")
 
 	for accepted_seq in accepted_sequences_arr:
-		if not (seq_dict_from_fam_fasta.has_key(accepted_seq)):
+		if not (accepted_seq in seq_dict_from_fam_fasta):
 			missing_sequences_outfile.write(accepted_seq+"\n")
 
 	missing_sequences_outfile.close()
