@@ -1,0 +1,16 @@
+TARGETS, = glob_wildcards("/data/family_fasta/{name}")
+
+rule all:
+ input:
+  expand("/data/results/{target}/{target}.missing_sequences", target=TARGETS)
+  
+
+rule undercl_detection_correction:
+ input:
+  fa = "/data/family_fasta/{target}"
+ output:
+  "/data/results/{target}/{target}.missing_sequences"
+ shell:
+  "undercl-detection-correction-subset.py {input.fa} F2 results"
+
+
