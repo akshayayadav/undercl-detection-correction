@@ -7,7 +7,7 @@ This application can be executed in 2 modes: global and subset. The global mode 
 
  1. #### Downloading the container
   ```
-  docker pull akshayayadav/overcl-detection-correction
+  docker pull akshayayadav/undercl-detection-correction
   ```
 
  2. #### Preparing the data
@@ -16,21 +16,21 @@ This application can be executed in 2 modes: global and subset. The global mode 
  3. #### Running the analysis
   * Global mode with F1-score function and *\<n\>* cores
   ```
-  docker run -v <absolute_path_to_data_directory>:/data akshayayadav/overcl-detection-correction run_analysis_global-F1.sh -c <n>
+  docker run -v <absolute_path_to_data_directory>:/data akshayayadav/undercl-detection-correction run_analysis_global-F1.sh -c <n>
   ```
   
   * Global mode with F2-score function and *\<n\>* cores
   ```
-  docker run -v <absolute_path_to_data_directory>:/data akshayayadav/overcl-detection-correction run_analysis_global-F2.sh -c <n>
+  docker run -v <absolute_path_to_data_directory>:/data akshayayadav/undercl-detection-correction run_analysis_global-F2.sh -c <n>
   ```
   
   * Subset mode with F1-score function and *\<n\>* cores
   ```
-  docker run -v <absolute_path_to_data_directory>:/data akshayayadav/overcl-detection-correction run_analysis_subset-F1.sh -c <n>
+  docker run -v <absolute_path_to_data_directory>:/data akshayayadav/undercl-detection-correction run_analysis_subset-F1.sh -c <n>
   ```
   
   * Subset mode with F2-score function and *\<n\>* cores
   ```
-  docker run -v <absolute_path_to_data_directory>:/data akshayayadav/overcl-detection-correction run_analysis_subset-F2.sh -c <n>
+  docker run -v <absolute_path_to_data_directory>:/data akshayayadav/undercl-detection-correction run_analysis_subset-F2.sh -c <n>
   ```
 
